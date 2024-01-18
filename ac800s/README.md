@@ -3,9 +3,13 @@ The dashboard for this router is currently WIP
 
 ## What's shown
 - Battery Percentage & Charging status
+- Registered Carrier name
 - Signal Type & Strength
 - Connected Devices
 - Device & Battery Temperature (in celsius)
+- Network connection status
+- IPv4 address
+- Unread messages count
 
 ## How to use
 1. Install & Activate CORS Unblock: [Firefox](https://addons.mozilla.org/en-US/firefox/addon/cors-unblock/) [Chrome](https://chromewebstore.google.com/detail/cors-unblock/lfhmikememgdcahcdlaciloancbhjino) [Microsoft Edge](https://microsoftedge.microsoft.com/addons/detail/cors-unblock/hkjklmhkbkdhlgnnfbbcihcajofmjgbh)
