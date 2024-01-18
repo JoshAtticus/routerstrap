@@ -34,6 +34,26 @@
         .card {
             margin-top: 20px;
         }
+
+        .temperature-low {
+            color: rgb(0, 76, 255);
+        }
+
+        .temperature-mild {
+            color: rgb(86, 255, 255);
+        }
+
+        .temperature-warm {
+            color: rgb(24, 212, 24);
+        }
+
+        .temperature-hot {
+            color: rgb(255, 166, 0);
+        }
+
+        .temperature-critical {
+            color: rgb(255, 0, 0);
+        }
     </style>
 </head>
 
@@ -61,9 +81,12 @@
                             <ul id="connected-clients-list"></ul>
                         </div>
                         <hr>
+                        <div class="info-block" id="temperature-warning" style="display: none;">
+                            <h3 class="text-danger">Warning: Device Overheating!</h3>
+                        </div>
                         <div class="info-block">
-                            <h3>Device Temperature: <span id="device-temperature"></span>°C</h3>
-                            <h3>Battery Temperature: <span id="battery-temperature"></span>°C</h3>
+                            <h3>Device Temperature: <span id="device-temperature"></span></h3>
+                            <h3>Battery Temperature: <span id="battery-temperature"></span></h3>
                         </div>
                     </div>
                 </div>
@@ -79,14 +102,25 @@
     <script>
         let lastUpdatedTime = Date.now();
 
+        function updateTemperatureDisplay(temperature, elementId) {
+            const element = document.getElementById(elementId);
+            element.textContent = `${temperature}°C`;
+            element.classList.remove('temperature-low', 'temperature-mild', 'temperature-warm', 'temperature-hot', 'temperature-critical');
+
+            if (temperature <= 10) {
+                element.classList.add('temperature-low');
+            } else if (temperature <= 20) {
+                element.classList.add('temperature-mild');
+            } else if (temperature <= 29) {
+                element.classList.add('temperature-warm');
+            } else {
+                element.classList.add('temperature-hot');
+            }
+        }
+
         function fetchRouterData() {
             fetch('http://192.168.1.1/api/model.json')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
                     let batteryEmoji = '';
                     if (data.power.charging) {
@@ -122,8 +156,21 @@
                         }
                     });
 
-                    document.getElementById('device-temperature').textContent = data.general.devTemperature;
-                    document.getElementById('battery-temperature').textContent = data.power.batteryTemperature;
+                    const deviceTemp = data.general.devTemperature;
+                    const batteryTemp = data.power.batteryTemperature;
+                    const isCritical = data.power.deviceTempCritical;
+
+                    updateTemperatureDisplay(deviceTemp, 'device-temperature');
+                    updateTemperatureDisplay(batteryTemp, 'battery-temperature');
+
+                    const warningElement = document.getElementById('temperature-warning');
+                    if (isCritical) {
+                        warningElement.style.display = 'block';
+                        document.getElementById('device-temperature').classList.add('temperature-critical');
+                        document.getElementById('battery-temperature').classList.add('temperature-critical');
+                    } else {
+                        warningElement.style.display = 'none';
+                    }
 
                     lastUpdatedTime = Date.now();
                     updateLastUpdatedText();
