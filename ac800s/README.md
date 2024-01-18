@@ -3,6 +3,7 @@ The dashboard for this router is currently WIP
 
 ## What's shown
 - Battery Percentage & Charging status
+- Registered Carrier name
 - Signal Type & Strength
 - Connected Devices
 - Device & Battery Temperature (in celsius)
