@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>RouterStrap - AC800S</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        .info-block {
+            margin-bottom: 10px;
+        }
+
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .info-block,
+        .dark-mode .card {
+            background-color: #121212;
+            border-color: #333333;
+        }
+
+        .router-image {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .card {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8">
+                <h1>Optus AC800S</h1>
+                <button id="dark-mode-toggle" class="btn btn-secondary mb-3">Toggle Dark Mode</button>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="info-block">
+                            <h2><span id="battery-level"></span></h2>
+                        </div>
+                        <div class="info-block">
+                            <h2><span id="signal-strength"></span></h2>
+                        </div>
+                        <hr>
+                        <div class="info-block">
+                            <h3>Connected Clients: <span id="connected-clients-count"></span></h3>
+                            <ul id="connected-clients-list"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <img src="router.png" alt="Router" class="router-image">
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function fetchRouterData() {
+            fetch('http://192.168.1.1/api/model.json')
+                .then(response => response.json())
+                .then(data => {
+                    let batteryEmoji = '';
+                    if (data.power.charging) {
+                        batteryEmoji = '⚡';
+                    } else if (data.power.battChargeLevel > 15) {
+                        batteryEmoji = '🔋';
+                    } else {
+                        batteryEmoji = '🪫';
+                    }
+                    document.getElementById('battery-level').textContent = `${data.power.battChargeLevel}% Battery ${batteryEmoji}`;
+
+                    const signalStrength = data.wwan.signalStrength;
+                    if (signalStrength) {
+                        const maxBars = 5;
+                        const filledBar = '●';
+                        const emptyBar = '○';
+                        const barsCount = Math.min(Math.max(signalStrength.bars, 0), maxBars);
+                        const signalBars = filledBar.repeat(barsCount) + emptyBar.repeat(maxBars - barsCount);
+                        document.getElementById('signal-strength').innerHTML = `${data.wwan.connectionText} ${signalBars}`;
+                    }
+
+                    const clientList = data.router.clientList.list;
+                    const clientCount = data.router.clientList.count;
+                    document.getElementById('connected-clients-count').textContent = clientCount;
+
+                    const clientsUl = document.getElementById('connected-clients-list');
+                    clientsUl.innerHTML = '';
+                    clientList.forEach(client => {
+                        if (client.IP && client.name) {
+                            const li = document.createElement('li');
+                            li.textContent = `${client.name} (${client.IP})`;
+                            clientsUl.appendChild(li);
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching router data:', error));
+        }
+
+        function applyDarkModePreference() {
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+        }
+
+        function toggleDarkMode() {
+            const isDarkMode = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+        }
+
+        document.getElementById('dark-mode-toggle').addEventListener('click', toggleDarkMode);
+        applyDarkModePreference();
+        document.addEventListener('DOMContentLoaded', fetchRouterData);
+        setInterval(fetchRouterData, 10000);
+    </script>
+</body>
+
+</html>
