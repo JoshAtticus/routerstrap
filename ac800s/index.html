@@ -60,6 +60,11 @@
                             <h3>Connected Clients: <span id="connected-clients-count"></span></h3>
                             <ul id="connected-clients-list"></ul>
                         </div>
+                        <hr>
+                        <div class="info-block">
+                            <h3>Device Temperature: <span id="device-temperature"></span>°C</h3>
+                            <h3>Battery Temperature: <span id="battery-temperature"></span>°C</h3>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -73,7 +78,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         let lastUpdatedTime = Date.now();
-        
+
         function fetchRouterData() {
             fetch('http://192.168.1.1/api/model.json')
                 .then(response => {
@@ -92,7 +97,7 @@
                         batteryEmoji = '🪫';
                     }
                     document.getElementById('battery-level').textContent = `${data.power.battChargeLevel}% Battery ${batteryEmoji}`;
-        
+
                     const signalStrength = data.wwan.signalStrength;
                     if (signalStrength) {
                         const maxBars = 5;
@@ -102,11 +107,11 @@
                         const signalBars = filledBar.repeat(barsCount) + emptyBar.repeat(maxBars - barsCount);
                         document.getElementById('signal-strength').innerHTML = `${data.wwan.connectionText} ${signalBars}`;
                     }
-        
+
                     const clientList = data.router.clientList.list;
                     const clientCount = data.router.clientList.count;
                     document.getElementById('connected-clients-count').textContent = clientCount;
-        
+
                     const clientsUl = document.getElementById('connected-clients-list');
                     clientsUl.innerHTML = '';
                     clientList.forEach(client => {
@@ -116,7 +121,10 @@
                             clientsUl.appendChild(li);
                         }
                     });
-        
+
+                    document.getElementById('device-temperature').textContent = data.general.devTemperature;
+                    document.getElementById('battery-temperature').textContent = data.power.batteryTemperature;
+
                     lastUpdatedTime = Date.now();
                     updateLastUpdatedText();
                 })
@@ -124,7 +132,7 @@
                     console.error('Error fetching router data:', error);
                 });
         }
-        
+
         function updateLastUpdatedText() {
             const now = Date.now();
             const secondsAgo = Math.round((now - lastUpdatedTime) / 1000);
@@ -134,24 +142,24 @@
             }
             document.getElementById('last-updated').textContent = text;
         }
-        
+
         function applyDarkModePreference() {
             if (localStorage.getItem('darkMode') === 'true') {
                 document.body.classList.add('dark-mode');
             }
         }
-        
+
         function toggleDarkMode() {
             const isDarkMode = document.body.classList.toggle('dark-mode');
             localStorage.setItem('darkMode', isDarkMode);
         }
-        
+
         document.getElementById('dark-mode-toggle').addEventListener('click', toggleDarkMode);
         applyDarkModePreference();
         document.addEventListener('DOMContentLoaded', fetchRouterData);
         setInterval(fetchRouterData, 10000);
         setInterval(updateLastUpdatedText, 1000);
-        </script>
+    </script>
 </body>
 
 </html>
