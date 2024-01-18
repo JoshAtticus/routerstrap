@@ -88,6 +88,13 @@
                             <h3>Device Temperature: <span id="device-temperature"></span></h3>
                             <h3>Battery Temperature: <span id="battery-temperature"></span></h3>
                         </div>
+                        <hr>
+                        <div class="info-block">
+                            <h3>Network Status: <span id="network-status"></span></h3>
+                            <h3>IP Address: <span id="ip-address"></span></h3>
+                            <h3><span id="sms-status"></span></h3>
+                            <small class="text-muted">Due to limitations imposed by your router, you cannot view, send, delete or reply to messages from here. You can do so from your router's official dashboard or by using the touchscreen on your router.</small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -132,6 +139,7 @@
                     }
                     document.getElementById('battery-level').textContent = `${data.power.battChargeLevel}% Battery ${batteryEmoji}`;
 
+                    const carrier = data.wwan.registerNetworkDisplay;
                     const signalStrength = data.wwan.signalStrength;
                     if (signalStrength) {
                         const maxBars = 5;
@@ -139,7 +147,7 @@
                         const emptyBar = '○';
                         const barsCount = Math.min(Math.max(signalStrength.bars, 0), maxBars);
                         const signalBars = filledBar.repeat(barsCount) + emptyBar.repeat(maxBars - barsCount);
-                        document.getElementById('signal-strength').innerHTML = `${data.wwan.connectionText} ${signalBars}`;
+                        document.getElementById('signal-strength').innerHTML = `${carrier} | ${data.wwan.connectionText} ${signalBars}`;
                     }
 
                     const clientList = data.router.clientList.list;
@@ -170,6 +178,28 @@
                         document.getElementById('battery-temperature').classList.add('temperature-critical');
                     } else {
                         warningElement.style.display = 'none';
+                    }
+
+                    const networkStatus = data.wwan.connection;
+                    const networkStatusElement = document.getElementById('network-status');
+                    networkStatusElement.textContent = networkStatus;
+                    networkStatusElement.classList.remove('text-success', 'text-danger');
+                    if (networkStatus === 'Connected') {
+                        networkStatusElement.classList.add('text-success');
+                    } else {
+                        networkStatusElement.classList.add('text-danger');
+                    }
+
+                    const ipAddress = data.wwan.IP;
+                    document.getElementById('ip-address').textContent = ipAddress;
+
+                    const smsReady = data.sms.ready;
+                    const unreadMsgs = data.sms.unreadMsgs;
+                    const smsStatusElement = document.getElementById('sms-status');
+                    if (smsReady) {
+                        smsStatusElement.textContent = `Unread Messages: ${unreadMsgs}`;
+                    } else {
+                        smsStatusElement.textContent = 'SMS Not Available';
                     }
 
                     lastUpdatedTime = Date.now();
