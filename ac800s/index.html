@@ -54,6 +54,10 @@
         .temperature-critical {
             color: rgb(255, 0, 0);
         }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 
@@ -69,27 +73,29 @@
 
                 <div class="card">
                     <div class="card-body">
-                        <div class="info-block">
+                        <h3 id="loading">Loading...</h3>
+                        <p id="notloading"><i>Not loading? Make sure you're connected to your router, CORS Unblock is enabled and mixed content is unblocked.</i></p>
+                        <div class="info-block hidden">
                             <h2><span id="battery-level"></span></h2>
                         </div>
-                        <div class="info-block">
+                        <div class="info-block hidden">
                             <h2><span id="signal-strength"></span></h2>
                         </div>
                         <hr>
-                        <div class="info-block">
+                        <div class="info-block hidden">
                             <h3>Connected Clients: <span id="connected-clients-count"></span></h3>
                             <ul id="connected-clients-list"></ul>
                         </div>
                         <hr>
-                        <div class="info-block" id="temperature-warning" style="display: none;">
+                        <div class="info-block hidden" id="temperature-warning" style="display: none;">
                             <h3 class="text-danger">Warning: Device Overheating!</h3>
                         </div>
-                        <div class="info-block">
+                        <div class="info-block hidden">
                             <h3>Device Temperature: <span id="device-temperature"></span></h3>
                             <h3>Battery Temperature: <span id="battery-temperature"></span></h3>
                         </div>
                         <hr>
-                        <div class="info-block">
+                        <div class="info-block hidden">
                             <h3>Network Status: <span id="network-status"></span></h3>
                             <h3>IP Address: <span id="ip-address"></span></h3>
                             <h3><span id="sms-status"></span></h3>
@@ -99,6 +105,7 @@
                         </div>
                     </div>
                 </div>
+                <small class="text-muted">routerstrap by JoshAtticus | <a href="https://github.com/JoshAtticus/routerstrap">source code</a></small>
             </div>
             <div class="col-md-4">
                 <img src="router.png" alt="Router" class="router-image">
@@ -187,8 +194,26 @@
                         document.getElementById('signal-strength').innerHTML = `${carrier} | ${connectionText} ${signalBars}`;
                     }
 
+                    const clientList = data.router.clientList.list;
+                    const clientCount = data.router.clientList.count;
+                    document.getElementById('connected-clients-count').textContent = clientCount;
+
+                    const clientsUl = document.getElementById('connected-clients-list');
+                    clientsUl.innerHTML = '';
+                    clientList.forEach(client => {
+                        if (client.IP && client.name) {
+                            const li = document.createElement('li');
+                            li.textContent = `${client.name} (${client.IP})`;
+                            clientsUl.appendChild(li);
+                        }
+                    });
+
                     lastUpdatedTime = Date.now();
                     updateLastUpdatedText();
+                    const infoBlocks = document.querySelectorAll('.info-block.hidden');
+                    infoBlocks.forEach(block => block.classList.remove('hidden'));
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('notloading').classList.add('hidden');
                 })
                 .catch(error => {
                     console.error('Error fetching router data:', error);

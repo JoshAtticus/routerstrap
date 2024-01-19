@@ -7,3 +7,6 @@ Almost every single router serves their API over an HTTP connection, while our s
 ## supported routers
 - Optus AC800S/NETGEAR AC810S
 - vodafone pocketWiFi2/Huawei E585
+
+## contributing
+Got a router you want to make a routerstrap dashboard for? Fork this repo and make a pull request for your specific router(s) and I'll feature you here!
