@@ -2,7 +2,13 @@
 The dashboard for this router is currently WIP
 
 ## What's shown
-- Nothing yet
+- Estimated battery level & charging state
+- Carrier Name
+- Signal Strength
+- Connected Devices
+- Network connection status
+- IPv4 address
+- Unread messages count
 
 ## How to use
 No instructions yet
