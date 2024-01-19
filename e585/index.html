@@ -170,7 +170,7 @@
 
                     const batteryLevel = batteryLevelStateElement ? parseInt(batteryLevelStateElement.textContent) : null;
                     // Map the battery level to text
-                    const batteryLevelMap = ['Very Low', 'Low', 'Medium', 'High', 'Full'];
+                    const batteryLevelMap = ['Very Low Battery', 'Low Battery', 'Medium Battery', 'High Battery', 'Full Battery'];
                     const batteryLevelDescription = batteryLevel !== null ? batteryLevelMap[batteryLevel] : 'Unknown';
 
                     if (batteryStateElement && batteryStateElement.textContent === '1') {
