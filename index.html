@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>RouterStrap</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        .info-block {
+            margin-bottom: 10px;
+        }
+
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .info-block,
+        .dark-mode .card {
+            background-color: #121212;
+            border-color: #333333;
+        }
+
+        .router-image {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .card {
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8">
+                <h1>RouterStrap</h1>
+                <small id="last-updated" class="text-muted"></small>
+                <br>
+                <button id="dark-mode-toggle" class="btn btn-secondary mb-3">Toggle Dark Mode</button>
+
+                <div class="card">
+                    <div class="card-body">
+                        <h3>Select your router</h3>
+                        <small>Want to help add a router? Make a pull request <a href="https://github.com/JoshAtticus/routerstrap/pulls">here</a>.</small>
+                        <p></p>
+                        <ul>
+                            <li><a href="/ac800s/index.html">Optus AC800S</a></li>
+                            <li><a href="/e585/index.html">Huawei E585</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h3>How to use RouterStrap</h3>
+                        <small>Follow these steps to get up and running with RouterStrap</small>
+                        <p></p>
+                        <ul>
+                            <li>1. Install & Activate CORS Unblock for your web browser (<a href="https://addons.mozilla.org/en-US/firefox/addon/cors-unblock/">Firefox</a>, <a href="https://chromewebstore.google.com/detail/cors-unblock/lfhmikememgdcahcdlaciloancbhjino">Chrome</a>, <a href="https://microsoftedge.microsoft.com/addons/detail/cors-unblock/hkjklmhkbkdhlgnnfbbcihcajofmjgbh">Edge</a>)</li>
+                            <li>2. Open RouterStrap for your router</li>
+                            <li>3. <a href="https://www.bu.edu/tech/support/browsers/display-mixed-content/">Unblock Mixed Content</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <small class="text-muted">RouterStrap by JoshAtticus | <a
+                        href="https://github.com/JoshAtticus/routerstrap">source code</a></small>
+            </div>
+            <div class="col-md-4">
+                <!-- <img src="router.png" alt="Router" class="router-image"> -->
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function applyDarkModePreference() {
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+        }
+
+        function toggleDarkMode() {
+            const isDarkMode = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+        }
+
+        document.getElementById('dark-mode-toggle').addEventListener('click', toggleDarkMode);
+        applyDarkModePreference();
+        document.addEventListener('DOMContentLoaded', fetchRouterData);
+    </script>
+</body>
+
+</html>
