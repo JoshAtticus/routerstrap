@@ -168,30 +168,22 @@
                     const batteryLevelElement = document.getElementById('battery-level');
                     let batteryLevelText = '';
 
+                    const batteryLevel = batteryLevelStateElement ? parseInt(batteryLevelStateElement.textContent) : null;
+                    // Map the battery level to text
+                    const batteryLevelMap = ['Very Low', 'Low', 'Medium', 'High', 'Full'];
+                    const batteryLevelDescription = batteryLevel !== null ? batteryLevelMap[batteryLevel] : 'Unknown';
+
                     if (batteryStateElement && batteryStateElement.textContent === '1') {
-                        batteryLevelText = '⚡ Charging'; // Charging
-                    } else if (batteryLevelStateElement) {
-                        const batteryLevel = parseInt(batteryLevelStateElement.textContent);
-                        // Map the battery level to text and add emojis
-                        switch (batteryLevel) {
-                            case 0: // Very Low
-                                batteryLevelText = 'Very Low Battery 🪫';
-                                break;
-                            case 1: // Low
-                                batteryLevelText = 'Low Battery 🪫';
-                                break;
-                            case 2: // Medium
-                                batteryLevelText = 'Medium Battery 🔋';
-                                break;
-                            case 3: // High
-                                batteryLevelText = 'High Battery 🔋';
-                                break;
-                            case 4: // Full
-                                batteryLevelText = 'Full Battery 🔋';
-                                break;
-                            default:
-                                batteryLevelText = 'Unknown Battery ❓';
-                                break;
+                        // If charging, show the current battery level with lightning emoji
+                        batteryLevelText = `${batteryLevelDescription} ⚡`;
+                    } else {
+                        // If not charging, show the current battery level with appropriate emoji
+                        if (batteryLevel === 0 || batteryLevel === 1) {
+                            batteryLevelText = `${batteryLevelDescription} 🪫`;
+                        } else if (batteryLevel >= 2 && batteryLevel <= 4) {
+                            batteryLevelText = `${batteryLevelDescription} 🔋`;
+                        } else {
+                            batteryLevelText = `${batteryLevelDescription} ❓`;
                         }
                     }
 
