@@ -17,3 +17,4 @@ No instructions yet
 
 ## Limitations
 - API does not provide battery percentage or signal type (such as H, 3G)
+- Not possible to view, send, delete or reply to SMS messages
