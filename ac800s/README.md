@@ -19,3 +19,4 @@ The dashboard for this router is currently WIP
 - This router's API has CORS, therefore CORS Unblock is required to function
 - It is impossible to get a token for admin permissions without dev tools, so editing settings, viewing wifi details etc is not possible as of now
 - API is known to randomly break, close the page, wait 30 seconds then re-open it if info is not loading
+- Not possible to view, send, delete or reply to SMS messages
