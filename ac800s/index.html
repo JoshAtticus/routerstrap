@@ -93,7 +93,9 @@
                             <h3>Network Status: <span id="network-status"></span></h3>
                             <h3>IP Address: <span id="ip-address"></span></h3>
                             <h3><span id="sms-status"></span></h3>
-                            <small class="text-muted">Due to limitations imposed by your router, you cannot view, send, delete or reply to messages from here. You can do so from your router's official dashboard or by using the touchscreen on your router.</small>
+                            <small class="text-muted">Due to limitations imposed by your router, you cannot view, send,
+                                delete or reply to messages from here. You can do so from your router's official
+                                dashboard or by using the touchscreen on your router.</small>
                         </div>
                     </div>
                 </div>
@@ -129,57 +131,6 @@
             fetch('http://192.168.1.1/api/model.json')
                 .then(response => response.json())
                 .then(data => {
-                    let batteryEmoji = '';
-                    if (data.power.charging) {
-                        batteryEmoji = '⚡';
-                    } else if (data.power.battChargeLevel > 15) {
-                        batteryEmoji = '🔋';
-                    } else {
-                        batteryEmoji = '🪫';
-                    }
-                    document.getElementById('battery-level').textContent = `${data.power.battChargeLevel}% Battery ${batteryEmoji}`;
-
-                    const carrier = data.wwan.registerNetworkDisplay;
-                    const signalStrength = data.wwan.signalStrength;
-                    if (signalStrength) {
-                        const maxBars = 5;
-                        const filledBar = '●';
-                        const emptyBar = '○';
-                        const barsCount = Math.min(Math.max(signalStrength.bars, 0), maxBars);
-                        const signalBars = filledBar.repeat(barsCount) + emptyBar.repeat(maxBars - barsCount);
-                        document.getElementById('signal-strength').innerHTML = `${carrier} | ${data.wwan.connectionText} ${signalBars}`;
-                    }
-
-                    const clientList = data.router.clientList.list;
-                    const clientCount = data.router.clientList.count;
-                    document.getElementById('connected-clients-count').textContent = clientCount;
-
-                    const clientsUl = document.getElementById('connected-clients-list');
-                    clientsUl.innerHTML = '';
-                    clientList.forEach(client => {
-                        if (client.IP && client.name) {
-                            const li = document.createElement('li');
-                            li.textContent = `${client.name} (${client.IP})`;
-                            clientsUl.appendChild(li);
-                        }
-                    });
-
-                    const deviceTemp = data.general.devTemperature;
-                    const batteryTemp = data.power.batteryTemperature;
-                    const isCritical = data.power.deviceTempCritical;
-
-                    updateTemperatureDisplay(deviceTemp, 'device-temperature');
-                    updateTemperatureDisplay(batteryTemp, 'battery-temperature');
-
-                    const warningElement = document.getElementById('temperature-warning');
-                    if (isCritical) {
-                        warningElement.style.display = 'block';
-                        document.getElementById('device-temperature').classList.add('temperature-critical');
-                        document.getElementById('battery-temperature').classList.add('temperature-critical');
-                    } else {
-                        warningElement.style.display = 'none';
-                    }
-
                     const networkStatus = data.wwan.connection;
                     const networkStatusElement = document.getElementById('network-status');
                     networkStatusElement.textContent = networkStatus;
@@ -200,6 +151,40 @@
                         smsStatusElement.textContent = `Unread Messages: ${unreadMsgs}`;
                     } else {
                         smsStatusElement.textContent = 'SMS Not Available';
+                    }
+
+                    // Update device temperature regardless of battery status
+                    updateTemperatureDisplay(data.general.devTemperature, 'device-temperature');
+
+                    // Check for 'No Battery' condition
+                    if (data.power.battChargeLevel === 0 && !data.power.charging && data.power.batteryTemperature === -99) {
+                        document.getElementById('battery-level').textContent = 'No Battery';
+                        document.getElementById('battery-temperature').textContent = 'No Battery';
+                    } else {
+                        let batteryEmoji = '';
+                        if (data.power.charging) {
+                            batteryEmoji = '⚡';
+                        } else if (data.power.battChargeLevel > 15) {
+                            batteryEmoji = '🔋';
+                        } else {
+                            batteryEmoji = '🪫';
+                        }
+                        document.getElementById('battery-level').textContent = `${data.power.battChargeLevel}% Battery ${batteryEmoji}`;
+
+                        // Update battery temperature
+                        updateTemperatureDisplay(data.power.batteryTemperature, 'battery-temperature');
+                    }
+
+                    const carrier = data.wwan.registerNetworkDisplay || 'No SIM Card';
+                    const connectionText = data.wwan.connectionText;
+                    const signalStrength = data.wwan.signalStrength;
+                    if (signalStrength) {
+                        const maxBars = 5;
+                        const filledBar = '●';
+                        const emptyBar = '○';
+                        const barsCount = Math.min(Math.max(signalStrength.bars, 0), maxBars);
+                        const signalBars = filledBar.repeat(barsCount) + emptyBar.repeat(maxBars - barsCount);
+                        document.getElementById('signal-strength').innerHTML = `${carrier} | ${connectionText} ${signalBars}`;
                     }
 
                     lastUpdatedTime = Date.now();
