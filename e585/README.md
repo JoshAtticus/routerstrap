@@ -7,7 +7,7 @@ The dashboard for this router is currently WIP
 - Signal Strength
 - Connected Devices
 - Network connection status
-- IPv4 address
+- ~~IPv4 address~~ Removed since API does not return actual IP
 - Unread messages count
 
 ## How to use

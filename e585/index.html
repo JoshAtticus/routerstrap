@@ -90,7 +90,7 @@
                         <hr>
                         <div class="info-block hidden">
                             <h3>Network Status: <span id="network-status"></span></h3>
-                            <h3>IP Address: <span id="ip-address"></span></h3>
+                            <!-- <h3>IP Address: <span id="ip-address"></span></h3> -->
                             <h3><span id="sms-status"></span></h3>
                             <small class="text-muted">Due to limitations imposed by your router, you cannot view, send,
                                 delete or reply to messages from here. You can do so from your router's official
@@ -143,7 +143,7 @@
                     const batteryLevelStateElement = data.getElementsByTagName('BatteryLevelState')[0];
                     const cardStateElement = data.getElementsByTagName('CardState')[0];
                     const evdoStateElement = data.getElementsByTagName('EvdoState')[0];
-                    const ipAddressElement = data.getElementsByTagName('ip_addr')[0];
+                    // const ipAddressElement = data.getElementsByTagName('ip_addr')[0];
                     const carrierElement = data.getElementsByTagName('Oper_Short_Name')[0];
 
                     // Update the network status
@@ -153,7 +153,7 @@
                     networkStatusElement.classList.toggle('text-danger', !connectStateElement || connectStateElement.textContent !== '1');
 
                     // Update the IP address
-                    document.getElementById('ip-address').textContent = ipAddressElement ? ipAddressElement.textContent : 'Unavailable';
+                    // document.getElementById('ip-address').textContent = ipAddressElement ? ipAddressElement.textContent : 'Unavailable';
 
                     // Update the SMS status
                     const smsStatusElement = document.getElementById('sms-status');
