@@ -235,7 +235,7 @@
             const now = Date.now();
             const secondsAgo = Math.round((now - lastUpdatedTime) / 1000);
             let text = `Last updated ${secondsAgo} seconds ago`;
-            if (secondsAgo > 10) {
+            if (secondsAgo > 5) {
                 text += " (current info is outdated)";
             }
             document.getElementById('last-updated').textContent = text;
