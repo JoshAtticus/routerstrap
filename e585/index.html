@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>RouterStrap - E585</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        .info-block {
+            margin-bottom: 10px;
+        }
+
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .info-block,
+        .dark-mode .card {
+            background-color: #121212;
+            border-color: #333333;
+        }
+
+        .router-image {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .card {
+            margin-top: 20px;
+        }
+
+        .temperature-low {
+            color: rgb(0, 76, 255);
+        }
+
+        .temperature-mild {
+            color: rgb(86, 255, 255);
+        }
+
+        .temperature-warm {
+            color: rgb(24, 212, 24);
+        }
+
+        .temperature-hot {
+            color: rgb(255, 166, 0);
+        }
+
+        .temperature-critical {
+            color: rgb(255, 0, 0);
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8">
+                <h1>Huawei E585</h1>
+                <small id="last-updated" class="text-muted"></small>
+                <br>
+                <p> </p>
+                <button id="dark-mode-toggle" class="btn btn-secondary mb-3">Toggle Dark Mode</button>
+
+                <div class="card">
+                    <div class="card-body">
+                        <h3 id="loading">Loading...</h3>
+                        <p id="notloading"><i>Not loading? Make sure you're connected to your router, CORS Unblock is
+                                enabled and mixed content is unblocked.</i></p>
+                        <div class="info-block hidden">
+                            <h2><span id="battery-level"></span></h2>
+                        </div>
+                        <div class="info-block hidden">
+                            <h2><span id="signal-strength"></span></h2>
+                        </div>
+                        <hr>
+                        <div class="info-block hidden">
+                            <h3>Connected Clients: <span id="connected-clients-count"></span></h3>
+                            <ul id="connected-clients-list"></ul>
+                        </div>
+                        <hr>
+                        <div class="info-block hidden">
+                            <h3>Network Status: <span id="network-status"></span></h3>
+                            <h3>IP Address: <span id="ip-address"></span></h3>
+                            <h3><span id="sms-status"></span></h3>
+                            <small class="text-muted">Due to limitations imposed by your router, you cannot view, send,
+                                delete or reply to messages from here. You can do so from your router's official
+                                dashboard.</small>
+                        </div>
+                    </div>
+                </div>
+                <small class="text-muted">routerstrap by JoshAtticus | <a
+                        href="https://github.com/JoshAtticus/routerstrap">source code</a></small>
+            </div>
+            <div class="col-md-4">
+                <img src="router.png" alt="Router" class="router-image">
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        let lastUpdatedTime = Date.now();
+
+        function updateTemperatureDisplay(temperature, elementId) {
+            const element = document.getElementById(elementId);
+            element.textContent = `${temperature}°C`;
+            element.classList.remove('temperature-low', 'temperature-mild', 'temperature-warm', 'temperature-hot', 'temperature-critical');
+
+            if (temperature <= 10) {
+                element.classList.add('temperature-low');
+            } else if (temperature <= 20) {
+                element.classList.add('temperature-mild');
+            } else if (temperature <= 29) {
+                element.classList.add('temperature-warm');
+            } else {
+                element.classList.add('temperature-hot');
+            }
+        }
+
+        function fetchRouterData() {
+            fetch('http://192.168.1.1/renovate.cgi')
+                .then(response => response.text()) // Get the response text
+                .then(str => {
+                    // Replace <br> with <br/> to fix the mismatched tag issue
+                    return str.replace(/<br>/g, '<br/>');
+                })
+                .then(str => (new window.DOMParser()).parseFromString(str, "text/xml")) // Parse it as XML
+                .then(data => {
+                    const connectStateElement = data.getElementsByTagName('Connectstate')[0];
+                    const unreadSmsElement = data.getElementsByTagName('UnreadSms')[0];
+                    const batteryStateElement = data.getElementsByTagName('BatteryState')[0];
+                    const batteryLevelStateElement = data.getElementsByTagName('BatteryLevelState')[0];
+                    const cardStateElement = data.getElementsByTagName('CardState')[0];
+                    const evdoStateElement = data.getElementsByTagName('EvdoState')[0];
+                    const ipAddressElement = data.getElementsByTagName('ip_addr')[0];
+                    const carrierElement = data.getElementsByTagName('Oper_Short_Name')[0];
+
+                    // Update the network status
+                    const networkStatusElement = document.getElementById('network-status');
+                    networkStatusElement.textContent = connectStateElement && connectStateElement.textContent === '1' ? 'Connected' : 'Disconnected';
+                    networkStatusElement.classList.toggle('text-success', connectStateElement && connectStateElement.textContent === '1');
+                    networkStatusElement.classList.toggle('text-danger', !connectStateElement || connectStateElement.textContent !== '1');
+
+                    // Update the IP address
+                    document.getElementById('ip-address').textContent = ipAddressElement ? ipAddressElement.textContent : 'Unavailable';
+
+                    // Update the SMS status
+                    const smsStatusElement = document.getElementById('sms-status');
+                    if (unreadSmsElement) {
+                        const unreadSms = unreadSmsElement.textContent;
+                        smsStatusElement.textContent = `Unread Messages: ${unreadSms}`;
+                    } else {
+                        smsStatusElement.textContent = 'SMS Not Available';
+                    }
+
+                    // Update the battery level and charging state
+                    const batteryLevelElement = document.getElementById('battery-level');
+                    let batteryLevelText = '';
+
+                    if (batteryStateElement && batteryStateElement.textContent === '1') {
+                        batteryLevelText = '⚡ Charging'; // Charging
+                    } else if (batteryLevelStateElement) {
+                        const batteryLevel = parseInt(batteryLevelStateElement.textContent);
+                        // Map the battery level to text and add emojis
+                        switch (batteryLevel) {
+                            case 0: // Very Low
+                                batteryLevelText = 'Very Low Battery 🪫';
+                                break;
+                            case 1: // Low
+                                batteryLevelText = 'Low Battery 🪫';
+                                break;
+                            case 2: // Medium
+                                batteryLevelText = 'Medium Battery 🔋';
+                                break;
+                            case 3: // High
+                                batteryLevelText = 'High Battery 🔋';
+                                break;
+                            case 4: // Full
+                                batteryLevelText = 'Full Battery 🔋';
+                                break;
+                            default:
+                                batteryLevelText = 'Unknown Battery ❓';
+                                break;
+                        }
+                    }
+
+                    batteryLevelElement.textContent = batteryLevelText;
+
+                    // Update carrier info and signal strength
+                    const carrier = carrierElement ? carrierElement.textContent : 'No SIM Card';
+                    const signalStrength = evdoStateElement ? '●'.repeat(parseInt(evdoStateElement.textContent)) + '○'.repeat(5 - parseInt(evdoStateElement.textContent)) : 'No Signal';
+                    document.getElementById('signal-strength').innerHTML = `${carrier} | ${signalStrength}`;
+
+                    // Update the connected clients count
+                    const wifiNumElement = data.getElementsByTagName('wifi_num')[0];
+                    const connectedClientsCountElement = document.getElementById('connected-clients-count');
+                    const wifiNum = wifiNumElement ? parseInt(wifiNumElement.textContent) : 0;
+                    connectedClientsCountElement.textContent = wifiNum;
+
+                    // Update the connected clients list
+                    const clientsUl = document.getElementById('connected-clients-list');
+                    clientsUl.innerHTML = ''; // Clear existing list
+                    for (let i = 1; i <= wifiNum; i++) {
+                        const deviceElement = data.getElementsByTagName(`device${i}`)[0];
+                        if (deviceElement && deviceElement.textContent.trim()) {
+                            const clientInfo = deviceElement.textContent.trim();
+                            const li = document.createElement('li');
+                            const [clientName, clientIP] = clientInfo.match(/([^\(]+)\(([^)]+)\)/).slice(1);
+                            li.textContent = `${clientName.trim()} (${clientIP.trim()})`;
+                            clientsUl.appendChild(li);
+                        }
+                    }
+
+                    // Make the info-blocks visible
+                    const infoBlocks = document.querySelectorAll('.info-block.hidden');
+                    infoBlocks.forEach(block => block.classList.remove('hidden'));
+
+                    // Hide the 'Loading...' message
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('notloading').style.display = 'none';
+
+                    lastUpdatedTime = Date.now();
+                    updateLastUpdatedText();
+                })
+                .catch(error => {
+                    console.error('Error fetching router data:', error);
+                });
+        }
+
+
+        function updateLastUpdatedText() {
+            const now = Date.now();
+            const secondsAgo = Math.round((now - lastUpdatedTime) / 1000);
+            let text = `Last updated ${secondsAgo} seconds ago`;
+            if (secondsAgo > 10) {
+                text += " (current info is outdated)";
+            }
+            document.getElementById('last-updated').textContent = text;
+        }
+
+        function applyDarkModePreference() {
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+        }
+
+        function toggleDarkMode() {
+            const isDarkMode = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+        }
+
+        document.getElementById('dark-mode-toggle').addEventListener('click', toggleDarkMode);
+        applyDarkModePreference();
+        document.addEventListener('DOMContentLoaded', fetchRouterData);
+        setInterval(fetchRouterData, 10000);
+        setInterval(updateLastUpdatedText, 1000);
+    </script>
+</body>
+
+</html>
