@@ -189,11 +189,40 @@
 
                     batteryLevelElement.textContent = batteryLevelText;
 
-                    // Update carrier info and signal strength
-                    const carrier = carrierElement ? carrierElement.textContent : 'No SIM Card';
-                    const signalStrength = evdoStateElement ? '●'.repeat(parseInt(evdoStateElement.textContent)) + '○'.repeat(5 - parseInt(evdoStateElement.textContent)) : 'No Signal';
-                    document.getElementById('signal-strength').innerHTML = `${carrier} | ${signalStrength}`;
+                    // Define the network type mapping
+                    const networkTypeMap = {
+                        0: 'No Service',
+                        1: 'GSM',
+                        2: 'GPRS',
+                        3: 'EDGE',
+                        4: '3G',
+                        5: 'HSDPA',
+                        6: 'HSUPA',
+                        7: 'H',
+                        260: 'SIM PIN Required',
+                        261: 'PUK Locked SIM'
+                    };
 
+                    // Update carrier info, network type, and check SIM card status
+                    const networkTypeElement = data.getElementsByTagName('Network')[0];
+                    const signalStrengthElement = document.getElementById('signal-strength');
+                    let carrierText = carrierElement && carrierElement.textContent.trim() !== '' ? carrierElement.textContent : '';
+                    let networkTypeText = networkTypeElement ? networkTypeMap[networkTypeElement.textContent] || 'Unknown' : 'Unknown';
+                    let signalStrengthText = '';
+
+                    // Update signal strength if SIM is valid and there is service
+                    if (cardStateElement && cardStateElement.textContent === '1' && networkTypeElement && networkTypeElement.textContent !== '0') {
+                        const evdoStateElement = data.getElementsByTagName('EvdoState')[0];
+                        if (evdoStateElement) {
+                            const signalBars = parseInt(evdoStateElement.textContent);
+                            signalStrengthText = '●'.repeat(signalBars) + '○'.repeat(5 - signalBars);
+                        }
+                    } else if (networkTypeElement && (networkTypeElement.textContent === '260' || networkTypeElement.textContent === '261')) {
+                        // Handle PIN and PUK required statuses without signal dots
+                        signalStrengthText = '';
+                    }
+
+                    signalStrengthElement.innerHTML = `${carrierText} | ${networkTypeText} ${signalStrengthText}`;
                     // Update the connected clients count
                     const wifiNumElement = data.getElementsByTagName('wifi_num')[0];
                     const connectedClientsCountElement = document.getElementById('connected-clients-count');

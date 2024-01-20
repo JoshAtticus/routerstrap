@@ -4,7 +4,7 @@ The dashboard for this router is currently WIP
 ## What's shown
 - Estimated battery level & charging state
 - Carrier Name
-- Signal Strength
+- Signal Strength & Type
 - Connected Devices
 - Network connection status
 - ~~IPv4 address~~ Removed since API does not return actual IP
@@ -16,5 +16,5 @@ No instructions yet
 2. Open RouterStrap for this router
 
 ## Limitations
-- API does not provide battery percentage or signal type (such as H, 3G)
+- API does not provide battery percentage
 - Not possible to view, send, delete or reply to SMS messages
