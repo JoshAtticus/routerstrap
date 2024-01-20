@@ -9,6 +9,8 @@ The dashboard for this router is currently WIP
 - Network connection status
 - ~~IPv4 address~~ Removed since API does not return actual IP
 - Unread messages count
+- Current internet Upload & Download usage
+- Session & Monthly data usage
 
 ## How to use
 No instructions yet

@@ -102,7 +102,17 @@
                         href="https://github.com/JoshAtticus/routerstrap">source code</a></small>
             </div>
             <div class="col-md-4">
-                <img src="router.png" alt="Router" class="router-image">
+                <img src="router.png" alt="Router" class="router-image" style="height: 270px">
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h3>Internet Usage</h3>
+                        <p>Upload ▲: <b><span style="color:rgb(88, 1, 238)" id="upload-speed"></span></b></p>
+                        <p>Download ▼: <b><span style="color:rgb(1, 135, 238)" id="download-speed"></span></b></p>
+                        <h3>Data Usage</h3>
+                        <p>This Session: <b><span id="session-data-used"></span></b></p>
+                        <p>This Month: <b><span id="monthly-data-used"></span></b></p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -111,22 +121,6 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         let lastUpdatedTime = Date.now();
-
-        function updateTemperatureDisplay(temperature, elementId) {
-            const element = document.getElementById(elementId);
-            element.textContent = `${temperature}°C`;
-            element.classList.remove('temperature-low', 'temperature-mild', 'temperature-warm', 'temperature-hot', 'temperature-critical');
-
-            if (temperature <= 10) {
-                element.classList.add('temperature-low');
-            } else if (temperature <= 20) {
-                element.classList.add('temperature-mild');
-            } else if (temperature <= 29) {
-                element.classList.add('temperature-warm');
-            } else {
-                element.classList.add('temperature-hot');
-            }
-        }
 
         function fetchRouterData() {
             fetch('http://192.168.1.1/renovate.cgi')
@@ -243,6 +237,26 @@
                         }
                     }
 
+                    // Update internet speed
+                    const uploadSpeedElement = data.getElementsByTagName('upload_speed')[0];
+                    const downloadSpeedElement = data.getElementsByTagName('download_speed')[0];
+                    document.getElementById('upload-speed').textContent = uploadSpeedElement ? uploadSpeedElement.textContent : 'Unavailable';
+                    document.getElementById('download-speed').textContent = downloadSpeedElement ? downloadSpeedElement.textContent : 'Unavailable';
+
+                    // Update data usage for current session
+                    const tinvolumElement = data.getElementsByTagName('Tinvolum')[0];
+                    const tinvolumUnitElement = data.getElementsByTagName('Tinvolum_unit')[0];
+                    const sessionDataUsedElement = document.getElementById('session-data-used');
+                    if (tinvolumElement && tinvolumUnitElement) {
+                        sessionDataUsedElement.textContent = `${tinvolumElement.textContent} ${tinvolumUnitElement.textContent}`;
+                    } else {
+                        sessionDataUsedElement.textContent = 'Unavailable';
+                    }
+
+                    // Update monthly data usage
+                    const totalCountersElement = data.getElementsByTagName('total_counters')[0];
+                    document.getElementById('monthly-data-used').textContent = totalCountersElement ? totalCountersElement.textContent : 'Unavailable';
+
                     // Make the info-blocks visible
                     const infoBlocks = document.querySelectorAll('.info-block.hidden');
                     infoBlocks.forEach(block => block.classList.remove('hidden'));
@@ -264,7 +278,7 @@
             const now = Date.now();
             const secondsAgo = Math.round((now - lastUpdatedTime) / 1000);
             let text = `Last updated ${secondsAgo} seconds ago`;
-            if (secondsAgo > 5) {
+            if (secondsAgo > 3) {
                 text += " (current info is outdated)";
             }
             document.getElementById('last-updated').textContent = text;
@@ -284,8 +298,8 @@
         document.getElementById('dark-mode-toggle').addEventListener('click', toggleDarkMode);
         applyDarkModePreference();
         document.addEventListener('DOMContentLoaded', fetchRouterData);
-        setInterval(fetchRouterData, 5000);
-        setInterval(updateLastUpdatedText, 1000);
+        setInterval(fetchRouterData, 3000);
+        setInterval(updateLastUpdatedText, 500);
     </script>
 </body>
 
